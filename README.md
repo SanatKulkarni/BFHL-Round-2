@@ -1,4 +1,3 @@
-
 # Bajaj Finserv Health - Lab Report OCR API 
 
 ## Overview
@@ -12,6 +11,8 @@ The core objective is to achieve this using Optical Character Recognition (OCR) 
 ## Problem Statement (Brief)
 
 Develop a scalable and accurate solution (deployed as a FastAPI service) to process lab report images, extracting all lab test names, their corresponding values, and reference ranges. Calculate whether the test value falls outside the reference range.
+
+# Deployed Link May show 502 error, but working with payload using API Client
 
 ## Features
 
