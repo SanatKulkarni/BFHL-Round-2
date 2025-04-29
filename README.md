@@ -1,5 +1,5 @@
 
-# Bajaj Finserv Health - Lab Report OCR API (Pillow Version)
+# Bajaj Finserv Health - Lab Report OCR API 
 
 ## Overview
 
