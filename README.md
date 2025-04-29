@@ -1,5 +1,4 @@
 
-```markdown
 # Bajaj Finserv Health - Lab Report OCR API
 
 ## Overview
@@ -181,4 +180,3 @@ The extraction process follows these main steps:
 ## How to Test
 
 Use the Swagger UI (`http://localhost:8000/docs`) or tools like `curl` or Postman to send `POST` requests with image files to the `/get-lab-tests` endpoint. Analyze the returned JSON and compare it against the original report image. Check terminal logs for debugging information.
-```
