@@ -29,7 +29,7 @@ Develop a scalable and accurate solution (deployed as a FastAPI service) to proc
 
 ## Technology Stack
 
-*   **Python 3.x**
+*   **Python 3.12.10**
 *   **FastAPI:** Web framework for building the API.
 *   **Uvicorn:** ASGI server to run the FastAPI application.
 *   **Pillow (PIL):** For image loading and preprocessing.
