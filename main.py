@@ -2,19 +2,13 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from typing import List
 import os
-import cv2 # Import OpenCV
-import numpy as np
 import traceback # For detailed error logging
 
-# Import Pydantic models and processing functions (will be created)
+# Import Pydantic models and processing functions
 from models import ApiResponse, LabTest
 from processing import process_lab_report # Import the main processing function
 
-app = FastAPI(title="Bajaj Lab Report OCR API")
-
-# Define upload directory (optional, processing in memory is often preferred)
-# UPLOAD_DIR = "temp_uploads"
-# os.makedirs(UPLOAD_DIR, exist_ok=True) # Ensure directory exists if using temporary files
+app = FastAPI(title="Bajaj Lab Report OCR API (Pillow)")
 
 @app.post("/get-lab-tests",
           response_model=ApiResponse,
@@ -45,7 +39,6 @@ async def get_lab_tests_endpoint(file: UploadFile = File(..., description="Lab r
         print(traceback.format_exc()) # Print full traceback
 
         # Return a structured failure response
-        # We avoid raising HTTPException here to always return the standard ApiResponse format
         return ApiResponse(is_success=False, data=[])
 
     finally:
@@ -62,4 +55,4 @@ def read_root():
     return {"message": "Bajaj Lab Report OCR API is running. Use the /docs endpoint for API documentation."}
 
 # Command to run (from the bajaj_lab_report_ocr directory):
-# uvicorn main:app --reload --host 0.0.0.0 --port 8000
+# uvicorn main:app --reload --host localhost --port 8000
