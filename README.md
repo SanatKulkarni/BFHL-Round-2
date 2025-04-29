@@ -1,11 +1,13 @@
 
-# Bajaj Finserv Health - Lab Report OCR API
+# Bajaj Finserv Health - Lab Report OCR API (Pillow Version)
 
 ## Overview
 
 This project implements a FastAPI service designed to process lab report images and extract structured information, specifically targeting lab test names, their measured values, units, and biological reference ranges.
 
 The core objective is to achieve this using Optical Character Recognition (OCR) and rule-based parsing **without relying on any Large Language Models (LLMs)** like GPT, Gemini, Claude, etc., as per the specific constraints of the Bajaj Finserv Health Data Science Q2 problem statement.
+
+**Note:** This version uses the Pillow (PIL) library for image processing instead of OpenCV.
 
 ## Problem Statement (Brief)
 
@@ -14,7 +16,7 @@ Develop a scalable and accurate solution (deployed as a FastAPI service) to proc
 ## Features
 
 *   Accepts lab report images (PNG, JPG, JPEG) via a POST request.
-*   Performs basic image preprocessing using OpenCV (Grayscale).
+*   Performs basic image preprocessing using **Pillow (PIL)** (Grayscale).
 *   Utilizes the Tesseract OCR engine (via `pytesseract`) to extract text from the image.
 *   Applies regular expressions and line-based heuristics to parse the OCR text and identify potential test entries.
 *   Attempts to extract:
@@ -30,7 +32,7 @@ Develop a scalable and accurate solution (deployed as a FastAPI service) to proc
 *   **Python 3.x**
 *   **FastAPI:** Web framework for building the API.
 *   **Uvicorn:** ASGI server to run the FastAPI application.
-*   **OpenCV (`opencv-python-headless`):** For image loading and preprocessing.
+*   **Pillow (PIL):** For image loading and preprocessing.
 *   **Pytesseract:** Python wrapper for the Tesseract OCR engine.
 *   **Tesseract OCR Engine:** (System Dependency) The core OCR engine.
 
@@ -73,7 +75,7 @@ Verify installation by opening a *new* terminal and running `tesseract --version
     ```bash
     pip install -r requirements.txt
     ```
-    *(If `requirements.txt` isn't finalized yet, run `pip install fastapi uvicorn[standard] python-multipart opencv-python-headless pytesseract`)*
+    *(Ensure `requirements.txt` includes `Pillow` and not `opencv-python-headless`. If not finalized, run `pip install fastapi uvicorn[standard] python-multipart Pillow pytesseract`)*
 
 ## Running the Application
 
@@ -130,52 +132,72 @@ The API returns a JSON object with the following structure:
        "test_unit": "mg/dl",
        "lab_test_out_of_range": true
     }
+    
   ]
 }
 ```
 
-### Error Response
+Error Response
 
 If an internal error occurs during processing, or the file type is invalid, the API aims to return:
 
-```json
 {
   "is_success": false,
   "data": []
 }
-```
-*(Note: Invalid file type currently raises a 400 HTTPException, which might have a different default FastAPI error format unless customized further.)*
+IGNORE_WHEN_COPYING_START
+content_copy
+download
+Use code with caution.
+Json
+IGNORE_WHEN_COPYING_END
 
-## Output Format Details
+(Note: Invalid file type currently raises a 400 HTTPException, which might have a different default FastAPI error format unless customized further.)
 
-Each object within the `data` list represents one extracted lab test and contains:
+Output Format Details
 
-*   `test_name` (str | null): The identified name of the lab test.
-*   `test_value` (str | null): The measured value, kept as a string.
-*   `bio_reference_range` (str | null): The reference range, kept as a string.
-*   `test_unit` (str | null): The unit associated with the value.
-*   `lab_test_out_of_range` (bool | null): `true` if the value falls outside the range, `false` if within, `null` if comparison couldn't be performed.
+Each object within the data list represents one extracted lab test and contains:
 
-## Core Logic Overview
+test_name (str | null): The identified name of the lab test.
+
+test_value (str | null): The measured value, kept as a string.
+
+bio_reference_range (str | null): The reference range, kept as a string.
+
+test_unit (str | null): The unit associated with the value.
+
+lab_test_out_of_range (bool | null): true if the value falls outside the range, false if within, null if comparison couldn't be performed.
+
+Core Logic Overview
 
 The extraction process follows these main steps:
 
-1.  **Image Input:** Receives image bytes via the API.
-2.  **Preprocessing (OpenCV):** Loads the image and converts it to grayscale to aid OCR.
-3.  **OCR (Tesseract):** Uses `pytesseract` to extract raw text from the preprocessed image, configured to assume blocks of text (suitable for some tables).
-4.  **Parsing (Regex & Heuristics):** Iterates through the OCR text lines, applying regular expressions to identify potential values, units, and ranges. It uses heuristics (like relative positions on a line) to associate these with a potential test name found on the same or previous line. It filters out lines presumed to be headers/footers. **No LLMs are used.**
-5.  **Range Calculation:** Compares the extracted `test_value` string and `bio_reference_range` string. It handles common numeric formats (`X-Y`, `<X`, `>X`) and basic textual comparisons ("Positive" vs "Negative").
-6.  **JSON Output:** Structures the extracted and calculated data into the specified JSON format using Pydantic models.
+Image Input: Receives image bytes via the API.
 
-## Known Limitations
+Preprocessing (Pillow): Loads the image using Pillow and converts it to grayscale ('L' mode) to aid OCR.
 
-*   **Layout Sensitivity:** The parsing logic heavily relies on text appearing in roughly expected columnar formats (Name, Value, Unit, Range on the same line). It struggles significantly with non-tabular layouts, merged cells, or complex formatting.
-*   **OCR Accuracy:** The quality of the extraction is highly dependent on the input image quality and the accuracy of Tesseract OCR. Poor scans, noise, unusual fonts, or skew can lead to incorrect text and failed parsing.
-*   **Handwritten Text:** Cannot process handwritten notes or values.
-*   **Heuristic Parsing:** The rules for associating names, values, units, and ranges are based on assumptions and may fail or misinterpret data in many real-world reports.
-*   **Range Format Support:** Only supports a limited set of common numeric and basic textual range formats. More complex descriptions or units within ranges may not be parsed correctly.
-*   **Multi-Page Reports:** Designed to process a single image at a time. Does not handle context across multiple pages.
+OCR (Tesseract): Uses pytesseract to extract raw text from the preprocessed Pillow image, configured to assume blocks of text (suitable for some tables).
 
-## How to Test
+Parsing (Regex & Heuristics): Iterates through the OCR text lines, applying regular expressions to identify potential values, units, and ranges. It uses heuristics (like relative positions on a line) to associate these with a potential test name found on the same or previous line. It filters out lines presumed to be headers/footers. No LLMs are used.
 
-Use the Swagger UI (`http://localhost:8000/docs`) or tools like `curl` or Postman to send `POST` requests with image files to the `/get-lab-tests` endpoint. Analyze the returned JSON and compare it against the original report image. Check terminal logs for debugging information.
+Range Calculation: Compares the extracted test_value string and bio_reference_range string. It handles common numeric formats (X-Y, <X, >X) and basic textual comparisons ("Positive" vs "Negative").
+
+JSON Output: Structures the extracted and calculated data into the specified JSON format using Pydantic models.
+
+Known Limitations
+
+Layout Sensitivity: The parsing logic heavily relies on text appearing in roughly expected columnar formats (Name, Value, Unit, Range on the same line). It struggles significantly with non-tabular layouts, merged cells, or complex formatting.
+
+OCR Accuracy: The quality of the extraction is highly dependent on the input image quality and the accuracy of Tesseract OCR. Poor scans, noise, unusual fonts, or skew can lead to incorrect text and failed parsing.
+
+Handwritten Text: Cannot process handwritten notes or values.
+
+Heuristic Parsing: The rules for associating names, values, units, and ranges are based on assumptions and may fail or misinterpret data in many real-world reports.
+
+Range Format Support: Only supports a limited set of common numeric and basic textual range formats. More complex descriptions or units within ranges may not be parsed correctly.
+
+Multi-Page Reports: Designed to process a single image at a time. Does not handle context across multiple pages.
+
+How to Test
+
+Use the Swagger UI (http://localhost:8000/docs) or tools like curl or Postman to send POST requests with image files to the /get-lab-tests endpoint. Analyze the returned JSON and compare it against the original report image. Check terminal logs for debugging information.
