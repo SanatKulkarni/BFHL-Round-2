@@ -36,6 +36,8 @@ Develop a scalable and accurate solution (deployed as a FastAPI service) to proc
 *   **Pytesseract:** Python wrapper for the Tesseract OCR engine.
 *   **Tesseract OCR Engine:** (System Dependency) The core OCR engine.
 
+![image](https://github.com/user-attachments/assets/461a0777-36f5-42d2-803b-77876c8e8859)
+
 ## Prerequisites
 
 **CRITICAL:** You **must** have the Tesseract OCR engine installed on your system and accessible in your PATH. `pytesseract` is only a Python wrapper.
