@@ -130,7 +130,6 @@ The API returns a JSON object with the following structure:
        "test_unit": "mg/dl",
        "lab_test_out_of_range": true
     }
-    // ... more extracted tests
   ]
 }
 ```
