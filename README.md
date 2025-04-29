@@ -1,4 +1,3 @@
-Okay, here is a README.md file based on the project we've built so far. You can save this content as `README.md` in the root of your `bajaj_lab_report_ocr` directory.
 
 ```markdown
 # Bajaj Finserv Health - Lab Report OCR API
